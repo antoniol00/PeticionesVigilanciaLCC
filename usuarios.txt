@@ -1,0 +1,28 @@
+#--------------------------------------------------------
+# Codificación: UTF-8
+#--------------------------------------------------------
+# Porcentajes asociados a cada codigo (categoria y cargo) (por defecto es 1)
+# Según decision consejo de departamento (9/mayo/2001)
+ATP 0.6
+A3  0.3
+CU  0.0
+DD  0.4
+JE  0.4
+SC  0.4
+VD  0.4
+DC  0.4
+SD  0.4
+VS  0.4
+VR  0.4
+#--------------------------------------------------------
+# username: deben ser letras [a-z] ascii puro (sin tildes)
+# nombre: nombre del profesor utilizando codificación UTF-8 
+#--------------------------------------------------------
+#username       categ   cargo   disp   loc   nombre
+#--------       -----   -----   ----   ---   ----------------
+#### BAJA #### aguayo          TU      **      ++     T     AGUAYO MALDONADO
+flv             TU      SD      ++     T     LUNA VALERO
+gabriel         TU      SD      ++     T     LUQUE POLO
+fls             BEC     **      ++     T     LUQUE SCHEMPP
+#### BAJA #### machuca         BEC     **      ++     T     MACHUCA SÁNCHEZ
+#--------------------------------------------------------------

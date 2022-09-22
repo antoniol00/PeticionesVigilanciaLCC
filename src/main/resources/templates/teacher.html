@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <title>Profesores - LCC Teacher Panel - UMA</title>
+    <meta content="UniBoard Admin - HTML5 Admin Template" name="description">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="https://asigdoclcc.uma.es/teachers/contenidos/apple-icon.png" rel="apple-touch-icon">
+    <link href="https://asigdoclcc.uma.es/teachers/contenidos/favicon.ico" rel="shortcut icon">
+    <link href="/css/normalize.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <link href="/css/themify-icons.css" rel="stylesheet">
+    <link href="/css/flag-icon.css" rel="stylesheet">
+    <link href="/css/cs-skin-elastic.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/css.css" rel="stylesheet" type="text/css">
+    <link href="/css/uniboard.css" rel="stylesheet">
+</head>
+
+<body class="vsc-initialized">
+
+<aside class="left-panel" id="left-panel">
+    <nav class="navbar navbar-expand-sm navbar-default">
+        <div class="navbar-header">
+            <button aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation"
+                    class="navbar-toggler"
+                    data-target="#main-menu" data-toggle="collapse" type="button">
+                <i class="fa fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="https://uma.es"><img
+                    alt="Logo" src="/images/logo-uma.png"></a>
+            <a class="navbar-brand hidden" href="https://uma.es"><img
+                    alt="Logo" src="/images/sello-uma.png"></a>
+        </div>
+        <div class="main-menu collapse navbar-collapse" id="main-menu">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a onclick='contenido("nueva")'><i class="menu-icon fa fa-plus"></i> Nueva peticion</a>
+                    <a onclick='contenido("historial")'><i class="menu-icon fa fa-clock-o"></i>Historial de
+                        peticiones</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</aside>
+
+<div class="right-panel" id="right-panel">
+
+    <!-- Header-->
+    <header class="header" id="header">
+        <div class="header-menu">
+            <div class="col-sm-1 d-none d-sm-block">
+                <a class="menutoggle pull-left" id="menuToggle"><i class="fa fa fa-tasks"></i></a>
+                <div class="header-left"></div>
+            </div>
+            <div class="col-sm-11">
+                <div class="user-area dropdown float-right">
+                    <img alt="Usuario" class="user-avatar rounded-circle" src="/images/usuario.png">
+                    <div class="user-info">
+                        <br>
+                        <p>
+                            <strong>Usuario:</strong> <label th:text="${username}"/>
+                        </p>
+                        <br/>
+                        <p>
+                            <button class="button btn-danger"><a th:href="@{/logout}">Cerrar sesión</a></button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <div class="alert alert-danger alert-dismissible fade show" id="alertBorrar"
+             th:if="${correcto} == false" th:text="${mensajeError}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-success alert-dismissible fade show" id="successCrear" th:if="${correcto} == true">
+            Petición creada
+            correctamente.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-success alert-dismissible fade show" id="exitoCopiar" th:if="${copiado}==true"> Petición
+            copiada
+            correctamente.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="content mt-3" id="contenedorNueva"
+         th:style="((${edicion}==false and ${borrado}==false and ${refresh}==false) or ${copiado}==true) ? 'display:block;' : 'display:none;'">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title"> Período de solicitud actual </strong>
+                        </div>
+                        <p th:text="${periodoSolicitudActual}"></p>
+                    </div>
+                    <div class="card" th:if="${periodoCerrado}">
+                        <div class="card-header">
+                            <strong class="card-title"><i class="menu-icon fa fa-plus"></i> Nueva petición de
+                                vigilancia </strong>
+                        </div>
+                        <form class="form-horizontal uniforms" enctype="multipart/form-data"
+                              id="formNuevaPeticion" method="post"
+                              name="formNuevaPeticion" onsubmit="return valida()" th:action="@{/teacher/add}">
+
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <!-- An input -->
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label class="form-control-label">Código de asignatura
+                                        </label> <a href="https://informatica.cv.uma.es/mod/folder/view.php?id=284117"
+                                                    target="_blank">(listado)</a>
+                                        </div>
+                                        <div class="col-12 col-md-10">
+                                            <input class="form-control form-control-sm" id="codigoAsignatura"
+                                                   placeholder="Código de asignatura entre los existentes"
+                                                   th:name="codigoAsignatura" th:value="${codigoAsignatura}"
+                                                   type="text" required>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-danger" id="warningCodigoAsignatura"
+                                         style="display: none;"></div>
+                                    <!-- An input -->
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label class="form-control-label">Fecha y hora
+                                        </label>
+                                        </div>
+                                        <div class="col-12 col-md-10">
+                                            <input class="form-control form-control-sm" id="fechaHora"
+                                                   th:name="fechaHora" type="datetime-local" th:value="${fechaHora}"
+                                                   required>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-danger" id="warningFecha" style="display: none;"></div>
+                                    <!-- An input -->
+                                    <div class="row form-group">
+                                        <div class="col col-md-2">
+                                            <label class="form-control-label">Profesores del examen</label>
+                                            <a data-toggle="modal" href="#modalProf">(profesores)</a>
+                                        </div>
+                                        <div class="col-12 col-md-10">
+                                            <input class="form-control form-control-sm" id="profesoresExamen"
+                                                   placeholder="Listado de nombres de usuario de profesores del examen, separados por espacios"
+                                                   th:name="profesoresExamen" th:value="${profesoresExamen}" type="text"
+                                                   required/>
+                                        </div>
+                                    </div>
+                                    <!-- An input -->
+                                    <div class="row form-group">
+                                        <div class="col col-md-2">
+                                            <label class="form-control-label">Número de vigilantes solicitados</label>
+                                        </div>
+                                        <div class="col-12 col-md-10">
+                                            <input class="form-control form-control-sm" id="numVigilantes"
+                                                   placeholder="Indique un número (puede ser 0) de vigilantes solicitados"
+                                                   th:name="numVigilantes" th:value="${numVigilantes}"
+                                                   type="text" required>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-danger" id="warningNumVigilantes"
+                                         style="display: none;"></div>
+                                    <!-- An input -->
+                                    <div class="row form-group">
+                                        <div class="col col-md-2">
+                                            <label class="form-control-label">Profesores sugeridos</label>
+                                            <a data-toggle="modal" href="#modalProf">(profesores)</a>
+                                        </div>
+                                        <div class="col-12 col-md-10">
+                                            <input class="form-control form-control-sm" id="profSugeridos"
+                                                   placeholder="Listado de nombres de usuario de profesores sugeridos para vigilancia, separados por espacios"
+                                                   th:name="profSugeridos" th:value="${profSugeridos}"
+                                                   type="text">
+                                        </div>
+                                    </div>
+                                    <!-- An input -->
+                                    <div class="row form-group">
+                                        <div class="col col-md-2">
+                                            <label class="form-control-label">Comentarios</label>
+                                        </div>
+                                        <div class="col-12 col-md-10">
+                                            <textarea class="form-control form-control-sm" cols="50" id="comentarios"
+                                                      placeholder="Indique los comentarios para la petición que estime oportunos"
+                                                      rows="4" th:text="${comentarios}"
+                                                      th:name="comentarios"></textarea>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="card-footer text-right">
+                                <button class="btn btn-primary btn-sm" type="submit"><i aria-hidden="true"
+                                                                                        class="fa fa-floppy-o"></i>
+                                    Crear
+                                    petición
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalProf"
+         tabindex="-1" aria-labelledby="labelProf"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="labelProf">Profesores disponibles</h5>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <pre th:text="${profDisponibles}"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content mt-3" id="contenedorHistorial"
+         th:style="(${edicion}==true or ${borrado}==true or ${refresh}==true) ? 'display:block;' : 'display:none;'">
+        <div class="alert alert-warning alert-dismissible fade show" id="warningErrorTabla" th:if="${errorEnPeticion}">
+            Las peticiones
+            sombreadas en rojo contienen en alguno de los listados proporcionados de profesores algunos
+            usuarios que no se encuentran actualmente activos en el sistema. Modifique cada una en el botón
+            correspondiente, proporcionando una lista correcta de profesores activos en el sistema.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-warning alert-dismissible fade show" id="warningRepeticion"
+             th:if="${repeticionEnPeticion}"> Se han detectado dos o
+            más peticiones para la misma asignatura y fecha de examen, que se encuentran sombreadas en amarillo. Examine
+            ambas en busca de conflictos y conserve únicamente la que desea proponer como petición al sistema.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show" id="errorEdicion" th:if="${contEdicion}==false"
+             th:text="${mensajeError}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-success alert-dismissible fade show" id="exitoEdicion" th:if="${contEdicion}==true">
+            Petición modificada
+            correctamente.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-success alert-dismissible fade show" id="exitoBorrar" th:if="${borrado}==true"
+             th:text="${msgBorrado}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-12">
+                    <form enctype="multipart/form-data"
+                          th:id="refreshAdmin"
+                          method="post"
+                          th:action="@{/teacher/refresh}">
+                        <button class="btn btn-info" type="submit"><i class="fa fa-arrow-rotate-right"></i> Actualizar
+                        </button>
+                    </form>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title"><i class="menu-icon fa fa-list"></i> Peticiones
+                                de
+                                vigilancia activas </strong>
+                        </div>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr class="text-center">
+                                <th scope="col">Fecha de solicitud</th>
+                                <th scope="col">Asignatura</th>
+                                <th scope="col">Fecha de examen</th>
+                                <th scope="col">Prof. del examen</th>
+                                <th scope="col">Prof. solicitados</th>
+                                <th scope="col">Prof. sugeridos</th>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Modificar petición</th>
+                                <th scope="col">Borrar petición</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:style="${background[iterStat.index]}"
+                                th:each="peticion,iterStat:${listaPeticiones}">
+                                <td th:text="${peticion.timestamp}" class="text-center"></td>
+                                <td th:text="${peticion.peticionPK.codigo}" class="text-center"></td>
+                                <td th:text="${peticion.peticionPK.fecha}" class="text-center"></td>
+                                <td th:text="${#strings.replace(peticion.peticionPK.profesores,' ', ', ')}"
+                                    class="text-center"></td>
+                                <td th:text="${peticion.numProfAdicionales}" class="text-center"></td>
+                                <td th:text="${#strings.replace(peticion.profesoresAdicionales,' ', ', ')}"
+                                    class="text-center"></td>
+                                <td class="text-center">
+                                    <button class="btn btn-success" data-toggle="modal"
+                                            th:if="${!#strings.isEmpty(peticion.comentarios)}"
+                                            th:attr="data-target='#modal'+${iterStat.index}">
+                                        <i class="menu-icon fa fa-paperclip fa-xs"></i>
+                                    </button>
+                                </td>
+
+                                <div class="modal fade" th:id="'modal'+${iterStat.index}"
+                                     tabindex="-1"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Comentarios</h5>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <pre th:text="${peticion.comentarios}"></pre>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                                    Cerrar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <td class="text-center">
+                                    <button class="btn btn-warning" data-toggle="modal"
+                                            th:attr="data-target='#modalEditar'+${iterStat.index}">
+                                        <i class="menu-icon fa fa-pencil fa-xs"></i>
+                                    </button>
+                                </td>
+
+                                <div class="modal fade"
+                                     th:id="'modalEditar'+${iterStat.index}"
+                                     tabindex="-1" aria-labelledby="exampleModalLabel"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Edición de petición</h5>
+                                            </div>
+                                            <form enctype="multipart/form-data"
+                                                  th:id="'formEditar'+${#strings.replace(peticion.timestamp,' ','')}"
+                                                  method="post" onsubmit="return validaEditar()"
+                                                  th:action="@{/teacher/edit}">
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+
+                                                        <label class="form-control-label">Código de asignatura
+                                                        </label> <a
+                                                            href="https://informatica.cv.uma.es/mod/folder/view.php?id=284117"
+                                                            target="_blank">(listado)</a></label>
+                                                        <input class="form-control form-control-sm"
+                                                               id="codigoAsignaturaEditar"
+                                                               placeholder="Código de asignatura entre los existentes"
+                                                               th:name="codigo"
+                                                               th:value="${peticion.peticionPK.codigo}"
+                                                               type="text" required>
+                                                        <br>
+
+                                                        <label class="form-control-label">Fecha y hora
+                                                        </label>
+
+                                                        <input class="form-control form-control-sm" id="fechaHoraEditar"
+                                                               th:name="fecha" type="datetime-local"
+                                                               th:value="${#dates.year(#dates.createNow())}+'-'+
+                                                                            ${#strings.substring(peticion.peticionPK.fecha,3,5)}+'-'+
+                                                                            ${#strings.substring(peticion.peticionPK.fecha,0,2)}+'T'+
+                                                                            ${#strings.substring(peticion.peticionPK.fecha,6)}">
+                                                        <br>
+
+                                                        <label class="form-control-label">Número de vigilantes
+                                                            solicitados</label>
+
+                                                        <input class="form-control form-control-sm"
+                                                               id="numVigilantesEditar"
+                                                               placeholder="Indique un número (puede ser 0) de vigilantes solicitados"
+                                                               th:name="numVigilantes"
+                                                               th:value="${peticion.numProfAdicionales}"
+                                                               type="text" required>
+                                                        <br>
+
+                                                        <div class="alert alert-warning"
+                                                             th:inline="text"
+                                                             th:if="${peticionesCheck[iterStat.index]}==false and ${#strings.contains(profesoresError[iterStat.index],' ')}==true">
+                                                            Los docentes: <b
+                                                                th:text="${#strings.replace(profesoresError[iterStat.index],' ', ', ')}"/>
+                                                            no se encuentran dados de alta actualmente en el sistema.
+                                                            Cambie
+                                                            dichos profesores por otros.
+                                                            Compruebe para ello el listado de profesores disponibles <a
+                                                                data-toggle="modal" href="#modalProf"
+                                                                data-dismiss="modal">aquí</a>.
+                                                        </div>
+                                                        <div class="alert alert-warning"
+                                                             th:inline="text"
+                                                             th:if="${peticionesCheck[iterStat.index]}==false and ${#strings.contains(profesoresError[iterStat.index],' ')}==false">
+                                                            El docente: <b
+                                                                th:text="${#strings.replace(profesoresError[iterStat.index],' ', ', ')}"/>
+                                                            no se encuentra dado de alta actualmente en el sistema.
+                                                            Cambie
+                                                            dicho profesor por otro(s).
+                                                            Compruebe para ello el listado de profesores disponibles <a
+                                                                data-toggle="modal" href="#modalProf"
+                                                                data-dismiss="modal">aquí</a>.
+                                                        </div>
+                                                        <div class="alert alert-warning"
+                                                             th:inline="text"
+                                                             th:if="${peticionesCheck[iterStat.index]}==true">
+                                                            Indique los nuevos profesores que formarán parte de la
+                                                            petición. Comprueba para ello el listado de profesores
+                                                            disponibles <a
+                                                                data-toggle="modal" href="#modalProf"
+                                                                data-dismiss="modal">aquí</a>.
+                                                        </div>
+                                                        <label class="form-control-label">Profesores del examen</label>
+                                                        <input class="form-control form-control-sm"
+                                                               id="profesoresExamenEditar"
+                                                               placeholder="Profesores del examen, separados por espacios"
+                                                               th:name="profesoresExamen"
+                                                               th:value="${peticion.peticionPK.profesores}"
+                                                               type="text"
+                                                               required/>
+                                                        <br>
+                                                        <label class="form-control-label">Profesores sugeridos</label>
+                                                        <input class="form-control form-control-sm"
+                                                               id="profSugeridosEditar"
+                                                               placeholder="Profesores sugeridos para vigilancia, separados por espacios"
+                                                               th:name="profSugeridos"
+                                                               th:value="${peticion.profesoresAdicionales}"
+                                                               type="text">
+                                                        <br>
+                                                        <label class="form-control-label">Comentarios</label>
+
+                                                        <textarea class="form-control form-control-sm" cols="50"
+                                                                  id="comentariosEditar"
+                                                                  placeholder="Indique los comentarios para la petición que estime oportunos"
+                                                                  rows="4" th:text="${peticion.comentarios}"
+                                                                  th:name="comentarios"></textarea>
+
+                                                        <input name="codigoAntiguo"
+                                                               th:value="${peticion.peticionPK.codigo}"
+                                                               type="hidden">
+                                                        <input name="fechaAntigua"
+                                                               th:value="${peticion.peticionPK.fecha}"
+                                                               type="hidden">
+                                                        <input name="profesoresExamenAntiguos"
+                                                               th:value="${peticion.peticionPK.profesores}"
+                                                               type="hidden">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                                        Cerrar
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary"><i aria-hidden="true"
+                                                                                                     class="fa fa-floppy-o"></i>
+                                                        Guardar
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <td class="text-center">
+                                    <form id="borrarPeticion" method="post" onclick="return borrarPeticion()"
+                                          name="borrarPeticion" th:action="@{/teacher/borra}">
+                                        <button class="btn btn-danger" type="submit"><i aria-hidden="true"
+                                                                                        class="fa fa-trash"></i>
+                                        </button>
+                                        <input name="prof" th:value="${peticion.peticionPK.profesores}" type="hidden"/>
+                                        <input name="codigo" th:value="${peticion.peticionPK.codigo}"
+                                               type="hidden">
+                                        <input name="fecha" th:value="${peticion.peticionPK.fecha}"
+                                               type="hidden">
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title"><i class="menu-icon fa fa-clock-o"></i> Peticiones de vigilancia
+                                anteriores
+                                NO activas </strong>
+                        </div>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr class="text-center">
+                                <th scope="col">Fecha de solicitud</th>
+                                <th scope="col">Asignatura</th>
+                                <th scope="col">Fecha de examen</th>
+                                <th scope="col">Prof. del examen</th>
+                                <th scope="col">Prof. solicitados</th>
+                                <th scope="col">Prof. sugeridos</th>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Copiar petición</th>
+                                <th scope="col">Borrar petición</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="peticion,iterStat:${listaPeticionesN}">
+                                <td th:text="${peticion.timestamp}" class="text-center"></td>
+                                <td th:text="${peticion.peticionPK.codigo}" class="text-center"></td>
+                                <td th:text="${peticion.peticionPK.fecha}" class="text-center"></td>
+                                <td th:text="${#strings.replace(peticion.peticionPK.profesores,' ', ', ')}"
+                                    class="text-center"></td>
+                                <td th:text="${peticion.numProfAdicionales}" class="text-center"></td>
+                                <td th:text="${#strings.replace(peticion.profesoresAdicionales,' ', ', ')}"
+                                    class="text-center"></td>
+                                <td class="text-center">
+                                    <button class="btn btn-success" data-toggle="modal"
+                                            th:if="${!#strings.isEmpty(peticion.comentarios)}"
+                                            th:attr="data-target='#modal'+${iterStat.index}">
+                                        <i class="menu-icon fa fa-paperclip fa-xs"></i>
+                                    </button>
+                                </td>
+
+                                <div class="modal fade" th:id="'modal'+${iterStat.index}"
+                                     tabindex="-1"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Comentarios</h5>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <pre th:text="${peticion.comentarios}"></pre>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                                    Cerrar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <td class="text-center">
+                                    <form id="copiarPeticion" method="post" onsubmit="return copiarPeticion()"
+                                          th:action="@{/teacher/copia}">
+                                        <button class="btn btn-warning" type="submit"><i aria-hidden="true"
+                                                                                         class="fa fa-paste"></i>
+                                        </button>
+                                        <input name="prof" th:value="${peticion.peticionPK.profesores}" type="hidden"/>
+                                        <input name="codigo" th:value="${peticion.peticionPK.codigo}"
+                                               type="hidden">
+                                        <input name="fecha" th:value="${peticion.peticionPK.fecha}"
+                                               type="hidden">
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    <form id="borrarPeticionAntigua" method="post" onclick="return borrarPeticion()"
+                                          th:action="@{/teacher/borra}">
+                                        <button class="btn btn-danger" type="submit"><i aria-hidden="true"
+                                                                                        class="fa fa-trash"></i>
+                                        </button>
+                                        <input name="prof" th:value="${peticion.peticionPK.profesores}" type="hidden"/>
+                                        <input name="codigo" th:value="${peticion.peticionPK.codigo}"
+                                               type="hidden">
+                                        <input name="fecha" th:value="${peticion.peticionPK.fecha}"
+                                               type="hidden">
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="fixed-bottom">
+    <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
+        <span class="float-md-right d-block d-md-inline-block d-none d-lg-block">© 2022 Universidad de Málaga</span>
+    </p>
+</footer>
+<script src="/js/jquery-2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+        crossorigin="anonymous"></script>
+<script src="/js/plugins.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/macc.js"></script>
+<script src="/js/macc_002.js"></script>
+<script src="/js/uniboard.js"></script>
+<script src="/js/funciones.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+<script src="/js/typeahead.bundle.js"></script>
+
+<div class="hidden" id="form-test-area-id"></div>
+</body>
+</html>

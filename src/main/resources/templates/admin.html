@@ -186,7 +186,7 @@
                     </div>
                     <div class="card" th:style="${emptylistaUsuarios} == true ? 'display:none;' : 'display:block;'">
                         <div class="card-header">
-                            <strong class="card-title"><i class="menu-icon fa fa-address-card"></i> Usuarios disponibles
+                            <strong class="card-title"><i class="menu-icon fa fa-address-card"></i> Usuarios disponibles (sombreados en rojo si no se encuentran activos)
                             </strong>
                         </div>
                         <table class="table table-striped">
@@ -197,7 +197,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="usuario:${listaUsuarios}">
+                            <tr th:each="usuario:${listaUsuarios}"
+                                th:style="${usuario.activo} ? '' : 'background-color:#E57777'">
                                 <td th:text="${usuario.username}" class="text-center"></td>
                                 <td th:text="${usuario.nombre}" class="text-center"></td>
                             </tr>

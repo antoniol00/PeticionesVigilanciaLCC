@@ -41,7 +41,7 @@ public class LoginService {
                 usuario = user;
             }else{
                 u = urepo.findById(user).get();
-                usuario = user + "@lcc.uma.es";
+                usuario = user + "@uma.es";
             }
             if (!u.isActivo()) {
                 return "El usuario no se encuentra activo. Póngase en contacto con el administrador del sistema si piensa que ha sido un error.";
@@ -81,7 +81,7 @@ public class LoginService {
                 }
                 answer.close();
                 ctx.close();
-                return true;
+                return false;
             }else{
                 return false;
             }

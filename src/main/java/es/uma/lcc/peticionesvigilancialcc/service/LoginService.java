@@ -1,12 +1,13 @@
 package es.uma.lcc.peticionesvigilancialcc.service;
 
+import es.uma.lcc.peticionesvigilancialcc.model.Gestion;
 import es.uma.lcc.peticionesvigilancialcc.model.Usuario;
+import es.uma.lcc.peticionesvigilancialcc.repository.GestionRepository;
 import es.uma.lcc.peticionesvigilancialcc.repository.UsuariosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Cipher;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.DirContext;
@@ -16,7 +17,6 @@ import javax.naming.directory.SearchResult;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class LoginService {
@@ -28,15 +28,24 @@ public class LoginService {
     @Autowired
     UsuariosRepository urepo;
 
+    @Autowired
+    GestionRepository grepo;
+
     public boolean checkAdminLogin(String user, String pass) {
         return user.equals(ADMINUSER) && pass.equals(ADMINPASSWORD);
     }
 
     public String checkTeacherLogin(String user, String pass) {
         try {
+            List<Gestion> list = grepo.findAll();
+            if(!list.isEmpty()){
+                if(!list.get(0).isUserOn()){
+                    return "El acceso a docentes se encuentra temporalmente desactivado.";
+                }
+            }
             Usuario u;
             String usuario;
-            if(user.indexOf("@")!=-1){
+            if(user.contains("@")){
                 u = urepo.findById(user.substring(0,user.indexOf("@"))).get();
                 usuario = user;
             }else{
@@ -46,6 +55,9 @@ public class LoginService {
             if (!u.isActivo()) {
                 return "El usuario no se encuentra activo. Póngase en contacto con el administrador del sistema si piensa que ha sido un error.";
             } else {
+                /*if((usuario.equals("gabriel@uma.es") && pass.equals("1234"))||(usuario.equals("flv@uma.es")&&pass.equals("1234"))){
+                    return"";
+                }*/
                 if (!compruebaLdap(usuario, pass)) {
                     return "Usuario o contraseña incorrectos.";
                 } else {
@@ -106,10 +118,5 @@ public class LoginService {
         }
         return true;
     }
-
-    /*public boolean checkEstadoUsuario() {
-        List<Gestion> list = grepo.findAll();
-        return list.get(0).isUserOn();
-    }*/
 }
 

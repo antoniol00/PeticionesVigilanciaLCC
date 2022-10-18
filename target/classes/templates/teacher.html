@@ -73,7 +73,8 @@
         </div>
     </header>
 
-    <div class="container mt-4">
+    <div class="content mt-3" id="contenedorNueva"
+         th:style="((${edicion}==false and ${borrado}==false and ${refresh}==false) or ${copiado}==true) ? 'display:block;' : 'display:none;'">
         <div class="alert alert-danger alert-dismissible fade show" id="alertBorrar"
              th:if="${correcto} == false" th:text="${mensajeError}">
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -88,10 +89,6 @@
             correctamente.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    </div>
-
-    <div class="content mt-3" id="contenedorNueva"
-         th:style="((${edicion}==false and ${borrado}==false and ${refresh}==false) or ${copiado}==true) ? 'display:block;' : 'display:none;'">
         <div class="animated fadeIn">
             <div class="row">
                 <div class="col-12">
@@ -110,6 +107,8 @@
                               id="formNuevaPeticion" method="post"
                               name="formNuevaPeticion" onsubmit="return valida()" th:action="@{/teacher/add}">
 
+                            <input id="nombreUsuario" th:name="nombreUsuario" th:value="${username}"
+                                   type="hidden">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                     <!-- An input -->
@@ -265,6 +264,8 @@
                           th:id="refreshAdmin"
                           method="post"
                           th:action="@{/teacher/refresh}">
+                        <input id="nombreUsuario5" th:name="nombreUsuario" th:value="${username}"
+                               type="hidden">
                         <button class="btn btn-info" type="submit"><i class="fa fa-arrow-rotate-right"></i> Actualizar
                         </button>
                     </form>
@@ -351,6 +352,8 @@
                                                   th:id="'formEditar'+${#strings.replace(peticion.timestamp,' ','')}"
                                                   method="post" onsubmit="return validaEditar()"
                                                   th:action="@{/teacher/edit}">
+                                                <input id="nombreUsuario2" th:name="nombreUsuario" th:value="${username}"
+                                                       type="hidden">
                                                 <div class="modal-body">
                                                     <div class="mb-3">
 
@@ -473,6 +476,8 @@
                                 <td class="text-center">
                                     <form id="borrarPeticion" method="post" onclick="return borrarPeticion()"
                                           name="borrarPeticion" th:action="@{/teacher/borra}">
+                                        <input id="nombreUsuario3" th:name="nombreUsuario" th:value="${username}"
+                                               type="hidden">
                                         <button class="btn btn-danger" type="submit"><i aria-hidden="true"
                                                                                         class="fa fa-trash"></i>
                                         </button>
@@ -552,6 +557,8 @@
                                 <td class="text-center">
                                     <form id="copiarPeticion" method="post" onsubmit="return copiarPeticion()"
                                           th:action="@{/teacher/copia}">
+                                        <input id="nombreUsuario4" th:name="nombreUsuario" th:value="${username}"
+                                               type="hidden">
                                         <button class="btn btn-warning" type="submit"><i aria-hidden="true"
                                                                                          class="fa fa-paste"></i>
                                         </button>

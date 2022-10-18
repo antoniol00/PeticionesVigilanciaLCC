@@ -1,8 +1,10 @@
 package es.uma.lcc.peticionesvigilancialcc.controller;
 
+import es.uma.lcc.peticionesvigilancialcc.model.Gestion;
 import es.uma.lcc.peticionesvigilancialcc.model.Periodo;
 import es.uma.lcc.peticionesvigilancialcc.model.Peticion;
 import es.uma.lcc.peticionesvigilancialcc.model.Usuario;
+import es.uma.lcc.peticionesvigilancialcc.repository.GestionRepository;
 import es.uma.lcc.peticionesvigilancialcc.repository.PeriodoRepository;
 import es.uma.lcc.peticionesvigilancialcc.service.AdminService;
 import es.uma.lcc.peticionesvigilancialcc.service.TeacherService;
@@ -38,6 +40,9 @@ public class AdminController {
 
     @Autowired
     PeriodoRepository perrrepo;
+
+    @Autowired
+    GestionRepository grepo;
 
     String username;
 
@@ -81,7 +86,7 @@ public class AdminController {
         List<Usuario> listaUsuarios;
         listaUsuarios = adminService.getListaUsuarios();
         model.addAttribute("listaUsuarios", listaUsuarios);
-        model.addAttribute("emptylistaUsuarios",listaUsuarios.isEmpty());
+        model.addAttribute("emptylistaUsuarios", listaUsuarios.isEmpty());
 
         try {
             if ((boolean) msg) {
@@ -124,7 +129,7 @@ public class AdminController {
         try {
             if ((boolean) borrado) {
                 model.addAttribute("borrado", true);
-            }else{
+            } else {
                 model.addAttribute("borrado", false);
             }
         } catch (Exception e) {
@@ -139,14 +144,20 @@ public class AdminController {
         } catch (Exception e) {
             model.addAttribute("edicion", false);
         }
-        if(!perrrepo.findAll().isEmpty()){
+        if (!perrrepo.findAll().isEmpty()) {
             Periodo p = perrrepo.findAll().get(0);
             model.addAttribute("periodoSolicitudActual",
                     "Periodo de solicitud actual: " + p.getDateInicio() + " - " + p.getDateFin());
-        }else{
+        } else {
             model.addAttribute("periodoSolicitudActual",
                     "No existe ningún período de solicitud abierto");
         }
+
+        List<Gestion> list = grepo.findAll();
+        if (!list.isEmpty()) {
+            model.addAttribute("gestionActiva", list.get(0).isUserOn() ? "Desactivar acceso docente" : "Activar acceso docente");
+        }
+
         File file = new File("peticiones.txt");
         if (file.exists()) {
             file.delete();
@@ -199,7 +210,7 @@ public class AdminController {
 
         try {
             byte[] bytes = file.getBytes();
-            Path path = Paths.get(file.getOriginalFilename());
+            Path path = Paths.get(Objects.requireNonNull(file.getOriginalFilename()));
             Files.write(path, bytes);
             adminService.addUsers(path);
         } catch (IOException e) {
@@ -210,7 +221,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    /*@PostMapping("/admin/desactiva")
+    @PostMapping("/admin/desactiva")
     public String desactivaUsuarios(RedirectAttributes redirectAttributes) {
         if (username.isEmpty()) {
             return "redirect:/";
@@ -218,7 +229,7 @@ public class AdminController {
         boolean msgActiva = adminService.desactivaUsuarios();
         redirectAttributes.addFlashAttribute("msgActiva", msgActiva);
         return "redirect:/admin";
-    }*/
+    }
 
     @PostMapping("/admin/editaEstado")
     public String editarEstadoUsuario(@RequestParam("username") String username,
@@ -249,8 +260,13 @@ public class AdminController {
         String check = teacherService.compruebaDatos(profesoresExamen, profSugeridos, fecha);
 
         if (check.isEmpty()) {
-            teacherService.editaPeticion(codigo, fecha, numVigilantes, profesoresExamen, profSugeridos, comentarios, codigoAntiguo, fechaAntigua, profesoresExamenAntiguos);
-            redirectAttributes.addFlashAttribute("edicion", true);
+            String errorEdicion = teacherService.editaPeticion(codigo, fecha, numVigilantes, profesoresExamen, profSugeridos, comentarios, codigoAntiguo, fechaAntigua, profesoresExamenAntiguos);
+            if (errorEdicion.isEmpty()) {
+                redirectAttributes.addFlashAttribute("edicion", true);
+            } else {
+                redirectAttributes.addFlashAttribute("edicion", false);
+                redirectAttributes.addFlashAttribute("mensajeError", errorEdicion);
+            }
         } else {
             redirectAttributes.addFlashAttribute("edicion", false);
             redirectAttributes.addFlashAttribute("mensajeError", check);

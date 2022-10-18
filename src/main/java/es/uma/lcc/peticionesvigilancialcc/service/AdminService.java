@@ -1,8 +1,10 @@
 package es.uma.lcc.peticionesvigilancialcc.service;
 
+import es.uma.lcc.peticionesvigilancialcc.model.Gestion;
 import es.uma.lcc.peticionesvigilancialcc.model.Periodo;
 import es.uma.lcc.peticionesvigilancialcc.model.Peticion;
 import es.uma.lcc.peticionesvigilancialcc.model.Usuario;
+import es.uma.lcc.peticionesvigilancialcc.repository.GestionRepository;
 import es.uma.lcc.peticionesvigilancialcc.repository.PeriodoRepository;
 import es.uma.lcc.peticionesvigilancialcc.repository.PeticionesRepository;
 import es.uma.lcc.peticionesvigilancialcc.repository.UsuariosRepository;
@@ -30,6 +32,9 @@ public class AdminService {
 
     @Autowired
     PeriodoRepository perrepo;
+
+    @Autowired
+    GestionRepository grepo;
 
     public List<Usuario> getListaUsuarios() {
         return repo.findAll();
@@ -78,8 +83,7 @@ public class AdminService {
         }
         String rawString = sb.toString();
         ByteBuffer buffer = StandardCharsets.UTF_8.encode(rawString);
-        String utf8EncodedString = StandardCharsets.UTF_8.decode(buffer).toString();
-        return utf8EncodedString;
+        return StandardCharsets.UTF_8.decode(buffer).toString();
     }
 
     public void addUsers(Path path) throws IOException {
@@ -94,7 +98,7 @@ public class AdminService {
             Scanner sc = new Scanner(file);
             List<Usuario> usuarioList = repo.findAll();
             while (sc.hasNextLine()) {
-                String data = sc.nextLine();
+                String data = sc.nextLine().trim();
                 if (!data.startsWith("#") && !data.isEmpty() && Character.isLowerCase(data.charAt(0))) {
                     String[] line = data.split("\\s+");
                     Usuario user = new Usuario();
@@ -155,24 +159,23 @@ public class AdminService {
         return true;
     }
 
-    /*public boolean desactivaUsuarios() {
+    public boolean desactivaUsuarios() {
         List<Gestion> list = grepo.findAll();
-        boolean newValue = !list.get(0).isUserOn();
-        grepo.deleteAll();
-        Gestion g = new Gestion();
-        g.setUserOn(newValue);
-        grepo.save(g);
-        return newValue;
-    }*/
-
-    /*public String gestionActiva() {
-        List<Gestion> list = grepo.findAll();
-        Boolean newValue = list.get(0).isUserOn();
-        if (newValue) {
-            return "Desactivar acceso de perfiles docentes";
+        if(list.isEmpty()){
+            Gestion g = new Gestion();
+            Boolean b = Boolean.FALSE;
+            g.setUserOn(b);
+            grepo.save(g);
+            return false;
+        }else{
+            boolean newValue = !list.get(0).isUserOn();
+            grepo.deleteAll();
+            Gestion g = new Gestion();
+            g.setUserOn(newValue);
+            grepo.save(g);
+            return newValue;
         }
-        return "Activar acceso de perfiles docentes";
-    }*/
+    }
 
     public void editaEstadoUsuario(String username) {
         Usuario u = repo.findById(username).get();

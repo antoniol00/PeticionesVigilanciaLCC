@@ -78,11 +78,10 @@ public class LoginController {
     public String teacherLogin(HttpServletResponse response, RedirectAttributes redirectAttributes, @RequestParam String password,
                                @RequestParam String username) {
 
-
         String msg = loginService.checkTeacherLogin(username, password);
         if (msg.isEmpty()) {
             Cookie cookie;
-            if (username.indexOf("@") != -1) {
+            if (username.contains("@")) {
                 cookie = new Cookie("usernameTeacher", username.substring(0, username.indexOf("@")));
             } else {
                 cookie = new Cookie("usernameTeacher", username);

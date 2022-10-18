@@ -220,7 +220,7 @@ public class TeacherService {
     }
 
 
-    public void editaPeticion(String codigo, String fecha, String numVigilantes,
+    public String editaPeticion(String codigo, String fecha, String numVigilantes,
                               String profesoresExamen, String profSugeridos,
                               String comentarios, String codigoAntiguo, String fechaAntigua,
                               String profesoresExamenAntiguos) {
@@ -230,17 +230,23 @@ public class TeacherService {
         ppk.setFecha(fechaAntigua);
         ppk.setProfesores(profesoresExamenAntiguos);
 
-        Peticion r = repo.findById(ppk).get();
-        repo.delete(r);
 
-        r.peticionPK.setCodigo(Integer.parseInt(codigo));
-        r.peticionPK.setFecha(fecha.substring(8, 10) + "/" + fecha.substring(5, 7) + " " + fecha.substring(11));
-        r.peticionPK.setProfesores(profesoresExamen);
-        r.setComentarios(comentarios);
-        r.setProfesoresAdicionales(profSugeridos);
-        r.setNumProfAdicionales(Integer.parseInt(numVigilantes));
+        try{
+            Peticion r = repo.findById(ppk).get();
+            repo.delete(r);
 
-        repo.save(r);
+            r.peticionPK.setCodigo(Integer.parseInt(codigo));
+            r.peticionPK.setFecha(fecha.substring(8, 10) + "/" + fecha.substring(5, 7) + " " + fecha.substring(11));
+            r.peticionPK.setProfesores(profesoresExamen);
+            r.setComentarios(comentarios);
+            r.setProfesoresAdicionales(profSugeridos);
+            r.setNumProfAdicionales(Integer.parseInt(numVigilantes));
+
+            repo.save(r);
+        }catch(NoSuchElementException e){
+            return "Error al editar la petición. Inténtelo de nuevo.";
+        }
+        return "";
     }
 
     public void borraPeticion(String codigo, String fecha, String prof) {

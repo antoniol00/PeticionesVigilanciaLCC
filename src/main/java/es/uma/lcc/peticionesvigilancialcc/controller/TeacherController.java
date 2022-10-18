@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Controller
@@ -30,8 +31,7 @@ public class TeacherController {
     PeriodoRepository perrrepo;
 
     @GetMapping("/teacher")
-    public String index(RedirectAttributes redirectAttributes,
-                        Model model,
+    public String index(Model model,
                         HttpServletRequest request,
                         @ModelAttribute("correcto") Object correcto,
                         @ModelAttribute("mensajeError") Object mensajeError,
@@ -47,12 +47,10 @@ public class TeacherController {
                         @ModelAttribute("copiado") Object copiado) {
 
         try {
-            if (username == null) {
-                username = Arrays.stream(request.getCookies())
-                        .filter(cookie -> "usernameTeacher".equals(cookie.getName()))
-                        .map(Cookie::getValue)
-                        .findAny().get();
-            }
+            username = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "usernameTeacher".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findAny().get();
         } catch (Exception e) {
             return "redirect:/";
         }
@@ -140,27 +138,28 @@ public class TeacherController {
         model.addAttribute("profesoresError", map.get("prof"));
         model.addAttribute("profDisponibles", listaProfesores);
 
-        if(!perrrepo.findAll().isEmpty()){
+        if (!perrrepo.findAll().isEmpty()) {
             Periodo p = perrrepo.findAll().get(0);
-            model.addAttribute("periodoCerrado",true);
+            model.addAttribute("periodoCerrado", true);
             model.addAttribute("periodoSolicitudActual",
                     "Periodo de solicitud actual: " + p.getDateInicio() + " - " + p.getDateFin());
-        }else{
+        } else {
             model.addAttribute("periodoSolicitudActual",
                     "No existe ningún período de solicitud abierto");
-            model.addAttribute("periodoCerrado",false);
+            model.addAttribute("periodoCerrado", false);
         }
         return "teacher";
     }
 
     @PostMapping("/teacher/add")
-    public String crearPeticion(RedirectAttributes redirectAttributes,
+    public String crearPeticion(HttpServletResponse response, RedirectAttributes redirectAttributes,
                                 @RequestParam String codigoAsignatura,
                                 @RequestParam String fechaHora,
                                 @RequestParam String profesoresExamen,
                                 @RequestParam String numVigilantes,
                                 @RequestParam String profSugeridos,
-                                @RequestParam String comentarios) {
+                                @RequestParam String comentarios,
+                                @RequestParam String nombreUsuario) {
         if (username.isEmpty()) {
             return "redirect:/";
         }
@@ -169,7 +168,7 @@ public class TeacherController {
 
         if (check.isEmpty()) {
             teacherService.creaPeticion(codigoAsignatura, fechaHora, profesoresExamen,
-                    numVigilantes, profSugeridos, comentarios, username);
+                    numVigilantes, profSugeridos, comentarios, nombreUsuario);
             redirectAttributes.addFlashAttribute("correcto", true);
             redirectAttributes.addFlashAttribute("codigoAsignatura", "");
             redirectAttributes.addFlashAttribute("fechaHora", "");
@@ -187,12 +186,14 @@ public class TeacherController {
             redirectAttributes.addFlashAttribute("profSugeridos", profSugeridos);
             redirectAttributes.addFlashAttribute("comentarios", comentarios);
         }
-
+        Cookie cookie = new Cookie("usernameTeacher", nombreUsuario);
+        cookie.setPath("/teacher");
+        response.addCookie(cookie);
         return "redirect:/teacher";
     }
 
     @PostMapping("/teacher/edit")
-    public String editarPeticion(RedirectAttributes redirectAttributes,
+    public String editarPeticion(HttpServletResponse response, RedirectAttributes redirectAttributes,
                                  @RequestParam String codigo,
                                  @RequestParam String fecha,
                                  @RequestParam String numVigilantes,
@@ -201,40 +202,53 @@ public class TeacherController {
                                  @RequestParam String comentarios,
                                  @RequestParam String codigoAntiguo,
                                  @RequestParam String fechaAntigua,
-                                 @RequestParam String profesoresExamenAntiguos) {
+                                 @RequestParam String profesoresExamenAntiguos,
+                                 @RequestParam String nombreUsuario) {
         if (username.isEmpty()) {
             return "redirect:/";
         }
         String check = teacherService.compruebaDatos(profesoresExamen, profSugeridos, fecha);
 
         if (check.isEmpty()) {
-            teacherService.editaPeticion(codigo, fecha, numVigilantes, profesoresExamen, profSugeridos, comentarios, codigoAntiguo, fechaAntigua, profesoresExamenAntiguos);
-            redirectAttributes.addFlashAttribute("edicion", true);
+            String errorEdicion = teacherService.editaPeticion(codigo, fecha, numVigilantes, profesoresExamen, profSugeridos, comentarios, codigoAntiguo, fechaAntigua, profesoresExamenAntiguos);
+            if (errorEdicion.isEmpty()) {
+                redirectAttributes.addFlashAttribute("edicion", true);
+            } else {
+                redirectAttributes.addFlashAttribute("edicion", false);
+                redirectAttributes.addFlashAttribute("mensajeError", errorEdicion);
+            }
         } else {
             redirectAttributes.addFlashAttribute("edicion", false);
             redirectAttributes.addFlashAttribute("mensajeError", check);
         }
-
+        Cookie cookie = new Cookie("usernameTeacher", nombreUsuario);
+        cookie.setPath("/teacher");
+        response.addCookie(cookie);
         return "redirect:/teacher";
     }
 
     @PostMapping("/teacher/borra")
-    public String borrarPeticion(RedirectAttributes redirectAttributes,
+    public String borrarPeticion(HttpServletResponse response, RedirectAttributes redirectAttributes,
                                  @RequestParam String codigo,
                                  @RequestParam String fecha,
-                                 @RequestParam String prof) {
+                                 @RequestParam String prof,
+                                 @RequestParam String nombreUsuario) {
 
         teacherService.borraPeticion(codigo, fecha, prof);
         redirectAttributes.addFlashAttribute("borrado", true);
         redirectAttributes.addFlashAttribute("msgBorrado", "Petición del examen de la asignatura " + codigo + " con fecha " + fecha + " borrada correctamente.");
+        Cookie cookie = new Cookie("usernameTeacher", nombreUsuario);
+        cookie.setPath("/teacher");
+        response.addCookie(cookie);
         return "redirect:/teacher";
     }
 
     @PostMapping("/teacher/copia")
-    public String copiarPeticion(RedirectAttributes redirectAttributes,
+    public String copiarPeticion(HttpServletResponse response, RedirectAttributes redirectAttributes,
                                  @RequestParam String codigo,
                                  @RequestParam String fecha,
-                                 @RequestParam String prof) {
+                                 @RequestParam String prof,
+                                 @RequestParam String nombreUsuario) {
 
         Peticion p = teacherService.getPeticion(codigo, fecha, prof);
 
@@ -248,13 +262,18 @@ public class TeacherController {
         redirectAttributes.addFlashAttribute("numVigilantes", p.getNumProfAdicionales());
         redirectAttributes.addFlashAttribute("profSugeridos", p.getProfesoresAdicionales());
         redirectAttributes.addFlashAttribute("comentarios", p.getComentarios());
-
+        Cookie cookie = new Cookie("usernameTeacher", nombreUsuario);
+        cookie.setPath("/teacher");
+        response.addCookie(cookie);
         return "redirect:/teacher";
     }
 
     @PostMapping("/teacher/refresh")
-    public String refresh(RedirectAttributes redirectAttributes) {
+    public String refresh(HttpServletResponse response, RedirectAttributes redirectAttributes, @RequestParam String nombreUsuario) {
         redirectAttributes.addFlashAttribute("refresh", true);
+        Cookie cookie = new Cookie("usernameTeacher", nombreUsuario);
+        cookie.setPath("/teacher");
+        response.addCookie(cookie);
         return "redirect:/teacher";
     }
 }
